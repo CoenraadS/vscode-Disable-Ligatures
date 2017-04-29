@@ -1,8 +1,8 @@
 {
     "name": "disableligaturescurrentline",
-    "displayName": "DisableLigaturesCurrentLine",
+    "displayName": "Disable Ligatures Current Line",
     "description": "Disable Ligatures on current line",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "CoenraadS",
     "engines": {
         "vscode": "^1.5.0"
@@ -26,5 +26,10 @@
         "mocha": "^2.3.3",
         "@types/node": "^6.0.40",
         "@types/mocha": "^2.2.32"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/CoenraadS/Disable-Ligatures-Current-Line"
+    },
+    "license": "SEE LICENSE IN LICENSE.md"
 }
