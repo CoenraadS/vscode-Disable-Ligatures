@@ -2,7 +2,7 @@
     "name": "disableligatures",
     "displayName": "Disable Ligatures",
     "description": "Disable Ligatures for cursor position or line",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "CoenraadS",
     "engines": {
         "vscode": "^1.5.0"
@@ -10,6 +10,7 @@
     "categories": [
         "Other"
     ],
+    "icon": "img/icon.png",
     "activationEvents": [
         "*"
     ],
