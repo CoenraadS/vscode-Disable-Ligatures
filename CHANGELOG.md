@@ -3,6 +3,9 @@ All notable changes to the "disableligaturescurrentline" extension will be docum
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.0.3]
+- Add Configuration options
+
 ## [0.0.2]
 - Add License & Repo information
 

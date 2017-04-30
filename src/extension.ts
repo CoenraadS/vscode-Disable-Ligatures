@@ -1,146 +1,117 @@
 import * as vscode from "vscode";
 
 export function activate(context: vscode.ExtensionContext) {
-    const ligatures: string[] =
-        [
-            ".=",
-            ".-",
-            ":=",
-            "=:=",
-            "==",
-            "!=",
-            "===",
-            "!==",
-            "=/=",
-            "<-<",
-            "<<-",
-            "<--",
-            "<-",
-            "<->",
-            "->",
-            "-->",
-            "->>",
-            ">->",
-            "<=<",
-            "<<=",
-            "<==",
-            "<=>",
-            "=>",
-            "==>",
-            "=>>",
-            ">=>",
-            ">>=",
-            ">>-",
-            ">-",
-            "<~>",
-            "-<",
-            "-<<",
-            "=<<",
-            "<~~",
-            "<~",
-            "~~",
-            "~>",
-            "~~>",
-            "<<<",
-            "<<",
-            "<=",
-            "<>",
-            ">=",
-            ">>",
-            ">>>",
-            "<|||",
-            "<||",
-            "<|",
-            "<|>",
-            "|>",
-            "||>",
-            "|||>",
-            "<$",
-            "<$>",
-            "$>",
-            "<+",
-            "<+>",
-            "+>",
-            "<*",
-            "<*>",
-            "*>",
-            "\\\\", // => \\
-            "\\\\\\", // => \\\
-            "\\*",
-            "*/",
-            "///",
-            "//",
-            "<//",
-            "<!==",
-            "</>",
-            "-->",
-            "/>",
-            ";;",
-            "::",
-            ":::",
-            "..",
-            "...",
-            "..<",
-            "!!",
-            "??",
-            "%%",
-            "&&",
-            "||",
-            "?.",
-            "?:",
-            "+",
-            "++",
-            "+++",
-            "-",
-            "--",
-            "---",
-            "*",
-            "**",
-            "***",
-            "~=",
-            "~-",
-            "www",
-            "-~",
-            "~@",
-            "^=",
-            "?=",
-            "/=",
-            "/==",
-            "|=",
-            "||=",
-            "#!",
-            "##",
-            "###",
-            "####",
-            "#{",
-            "#[",
-            "]#",
-            "#(",
-            "#?",
-            "#_",
-            "#_(",
-        ]
-
-        ]
     const decoration = vscode.window.createTextEditorDecorationType({ color: "" });
+    let configuration = readConfiguration();
+
+    vscode.workspace.onDidChangeConfiguration((event) => {
+        configuration = readConfiguration();
+    }, null, context.subscriptions);
+
     vscode.window.onDidChangeTextEditorSelection((event) => {
+        configuration.regex.lastIndex = 0;
+        disableLigatures(event);
+    }, null, context.subscriptions);
+
+    function disableLigatures(event: vscode.TextEditorSelectionChangeEvent) {
         const editor = event.textEditor;
-        const set = new Set<number>();
-        event.selections.forEach((selection) => {
-            set.add(selection.start.line);
-            set.add(selection.end.line);
-        });
+
+        const positions = selectionsToMap(event.selections);
 
         const ranges: vscode.Range[] = [];
 
-        set.forEach((lineNumber) => {
-            const range = new vscode.Range(new vscode.Position(lineNumber, 0), new vscode.Position(lineNumber + 1, 0));
-            const lineLength = editor.document.getText(range).length;
-            for (let i = 0; i < lineLength; i++) {
-                ranges.push(new vscode.Range(lineNumber, i, lineNumber, i + 1));
+        for (const [lineNumber, charPositions] of positions) {
+            const lineStart = new vscode.Position(lineNumber, 0);
+            const lineEnd = new vscode.Position(lineNumber + 1, 0);
+            const lineRange = new vscode.Range(lineStart, lineEnd);
+            const text = editor.document.getText(lineRange);
+
+            for (const position of charPositions) {
+                let match: RegExpExecArray | null;
+                // tslint:disable-next-line:no-conditional-assignment
+                while ((match = configuration.regex.exec(text)) !== null) {
+
+                    if (configuration.mode === "Line") {
+                        ranges.push(...matchLine(lineNumber, match));
+                    }
+                    else if (configuration.mode === "Cursor") {
+                        ranges.push(...matchCursor(lineNumber, position, match));
+                    }
+                    else {
+                        throw new Error("Invalid Mode");
+                    }
+                }
+            }
+        }
+
+        editor.setDecorations(decoration, ranges);
+    }
+
+    function matchLine(lineNumber: number, match: RegExpExecArray) {
+        const ranges: vscode.Range[] = [];
+        for (let i = 0; i < match[0].length; i++) {
+            const offset = match.index + i;
+            ranges.push(new vscode.Range(lineNumber, offset, lineNumber, offset + 1));
+        }
+
+        return ranges;
+    }
+
+    function matchCursor(lineNumber: number, position: number, match: RegExpExecArray) {
+        const ranges: vscode.Range[] = [];
+        if (position >= match.index && position <= match.index + match[0].length) {
+            for (let i = 0; i < match[0].length; i++) {
+                const offset = match.index + i;
+                ranges.push(new vscode.Range(lineNumber, offset, lineNumber, offset + 1));
+            }
+        }
+
+        return ranges;
+    }
+
+    function selectionsToMap(selections: vscode.Selection[]) {
+        const positions = new Map<number, number[]>();
+
+        selections.forEach((selection) => {
+            let charPositions = positions.get(selection.start.line);
+
+            if (charPositions) {
+                charPositions.push(selection.start.character);
+            }
+            else {
+                positions.set(selection.start.line, [selection.start.character]);
+            }
+
+            charPositions = positions.get(selection.end.line);
+
+            if (charPositions) {
+                charPositions.push(selection.end.character);
+            }
+            else {
+                positions.set(selection.end.line, [selection.end.character]);
             }
         });
 
-        editor.setDecorations(decoration, ranges);
-    }, null, context.subscriptions);
+        return positions;
+    }
+
+    function readConfiguration(): { mode: string, regex: RegExp } {
+        const ligatureConfiguration = vscode.workspace.getConfiguration().get("disableLigatures") as any;
+        const ligatures = ligatureConfiguration.ligatures as string[];
+
+        ligatures.sort((a, b) => {
+            return b.length - a.length;
+        });
+
+        const escapeRegex = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g;
+
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < ligatures.length; i++) {
+            ligatures[i] = ligatures[i].replace(escapeRegex, "\\$&");
+        }
+
+        const mode = ligatureConfiguration.mode as string;
+        const regex = new RegExp(ligatures.join("|"), "gi");
+        return { mode, regex };
+    }
 }
