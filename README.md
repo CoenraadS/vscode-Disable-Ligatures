@@ -11,5 +11,5 @@ Disable all ligatures on the current line
 Disable ligatures at cursor position  
 ![Cursor](img/cursor.png)
 
-`disableLigatures.ligatures"`  
+`"disableLigatures.ligatures"`  
 Choose which ligatures to disable
