@@ -1,3 +1,6 @@
+## [0.0.6]
+- Fix multicursors on same line
+
 ## [0.0.5]
 - Improve logic to prevent duplicate decorations
 

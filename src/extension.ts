@@ -17,7 +17,6 @@ export function activate(context: vscode.ExtensionContext) {
         const editor = event.textEditor;
 
         const positions = selectionsToMap(event.selections);
-
         const ranges: vscode.Range[] = [];
 
         for (const [lineNumber, charPositions] of positions) {
@@ -26,16 +25,10 @@ export function activate(context: vscode.ExtensionContext) {
             const lineRange = new vscode.Range(lineStart, lineEnd);
             const text = editor.document.getText(lineRange);
 
-            let lastMatchPos = -1;
             for (const position of charPositions) {
                 let match: RegExpExecArray | null;
                 // tslint:disable-next-line:no-conditional-assignment
                 while ((match = configuration.regex.exec(text)) !== null) {
-                    const matchEndPos = match.index + match[0].length;
-                    if (matchEndPos <= lastMatchPos) {
-                        continue;
-                    }
-
                     if (configuration.mode === "Line") {
                         ranges.push(...matchLine(lineNumber, match));
                     }
@@ -45,7 +38,6 @@ export function activate(context: vscode.ExtensionContext) {
                     else {
                         throw new Error("Invalid Mode");
                     }
-                    lastMatchPos = matchEndPos;
                 }
             }
         }
@@ -76,25 +68,25 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function selectionsToMap(selections: vscode.Selection[]) {
-        const positions = new Map<number, number[]>();
+        const positions = new Map<number, Set<number>>();
 
         selections.forEach((selection) => {
             let charPositions = positions.get(selection.start.line);
 
             if (charPositions) {
-                charPositions.push(selection.start.character);
+                charPositions.add(selection.start.character);
             }
             else {
-                positions.set(selection.start.line, [selection.start.character]);
+                positions.set(selection.start.line, new Set<number>([selection.start.character]));
             }
 
             charPositions = positions.get(selection.end.line);
 
             if (charPositions) {
-                charPositions.push(selection.end.character);
+                charPositions.add(selection.end.character);
             }
             else {
-                positions.set(selection.end.line, [selection.end.character]);
+                positions.set(selection.end.line, new Set<number>([selection.end.character]));
             }
         });
 
