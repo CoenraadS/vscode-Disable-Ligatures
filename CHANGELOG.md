@@ -1,3 +1,9 @@
+## [0.0.5]
+- Improve logic to prevent duplicate decorations
+
+## [0.0.4]
+- Add Icon
+
 ## [0.0.3]
 - Add Configuration options
 

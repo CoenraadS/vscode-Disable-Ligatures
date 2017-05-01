@@ -26,10 +26,15 @@ export function activate(context: vscode.ExtensionContext) {
             const lineRange = new vscode.Range(lineStart, lineEnd);
             const text = editor.document.getText(lineRange);
 
+            let lastMatchPos = -1;
             for (const position of charPositions) {
                 let match: RegExpExecArray | null;
                 // tslint:disable-next-line:no-conditional-assignment
                 while ((match = configuration.regex.exec(text)) !== null) {
+                    const matchEndPos = match.index + match[0].length;
+                    if (matchEndPos <= lastMatchPos) {
+                        continue;
+                    }
 
                     if (configuration.mode === "Line") {
                         ranges.push(...matchLine(lineNumber, match));
@@ -40,6 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
                     else {
                         throw new Error("Invalid Mode");
                     }
+                    lastMatchPos = matchEndPos;
                 }
             }
         }
@@ -99,6 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
         const ligatureConfiguration = vscode.workspace.getConfiguration().get("disableLigatures") as any;
         const ligatures = ligatureConfiguration.ligatures as string[];
 
+        // Match longest first
         ligatures.sort((a, b) => {
             return b.length - a.length;
         });
