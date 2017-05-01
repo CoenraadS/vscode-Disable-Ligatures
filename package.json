@@ -1,7 +1,7 @@
 {
     "name": "disableligatures",
     "displayName": "Disable Ligatures",
-    "description": "Disable Ligatures for cursor position or line",
+    "description": "Disable ligatures at the cursor position, or disable all ligatures on the line",
     "version": "0.0.6",
     "publisher": "CoenraadS",
     "engines": {
