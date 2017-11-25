@@ -20,10 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
         const ranges: vscode.Range[] = [];
 
         for (const [lineNumber, charPositions] of positions) {
-            const lineStart = new vscode.Position(lineNumber, 0);
-            const lineEnd = new vscode.Position(lineNumber + 1, 0);
-            const lineRange = new vscode.Range(lineStart, lineEnd);
-            const text = editor.document.getText(lineRange);
+            const text = editor.document.lineAt(lineNumber).text;
 
             for (const position of charPositions) {
                 let match: RegExpExecArray | null;

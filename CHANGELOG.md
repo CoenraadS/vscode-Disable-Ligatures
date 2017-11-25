@@ -1,3 +1,6 @@
+## [0.0.7]
+- Minor refactoring
+
 ## [0.0.6]
 - Fix multicursors on same line
 
