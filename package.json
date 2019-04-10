@@ -51,9 +51,26 @@
                     ],
                     "default": "Cursor"
                 },
+                "disableLigatures.globalLigatures": {
+                    "description": "Global ligatures to disable",
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string",
+                        "title": "ligature to disable"
+                    },
+                    "default": [
+                        "fi",
+                        "fl",
+                        "www"
+                    ]
+                },
                 "disableLigatures.ligatures": {
                     "description": "Ligatures to disable",
-                    "type": "array",
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string",
+                        "title": "ligature to disable"
+                    },
                     "default": [
                         ".=",
                         ".-",
@@ -159,7 +176,6 @@
                         "***",
                         "~=",
                         "~-",
-                        "www",
                         "-~",
                         "~@",
                         "^=",
