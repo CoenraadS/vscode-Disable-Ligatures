@@ -13,3 +13,6 @@ Disable ligatures at cursor position
 
 `"disableLigatures.ligatures"`  
 Choose which ligatures to disable
+
+`"disableLigatures.globalLigatures"`  
+Choose which global ligatures to disable
