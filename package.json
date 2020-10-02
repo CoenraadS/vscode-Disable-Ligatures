@@ -2,7 +2,7 @@
     "name": "disableligatures",
     "displayName": "Disable Ligatures",
     "description": "Disable ligatures at the cursor position, or disable all ligatures on the line",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "publisher": "CoenraadS",
     "engines": {
         "vscode": "^1.5.0"
